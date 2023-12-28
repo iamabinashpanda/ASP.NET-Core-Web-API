@@ -4,16 +4,19 @@ using ASP.NET_Core_Web_API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
 namespace ASP.NET_Core_Web_API.Migrations
 {
-    [DbContext(typeof(AspNetCoreWebApi))]
-    partial class AspNetCoreWebApiModelSnapshot : ModelSnapshot
+    [DbContext(typeof(AspNetCoreWebApiDbContext))]
+    [Migration("20231228142626_initial migration")]
+    partial class initialmigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -39,7 +42,7 @@ namespace ASP.NET_Core_Web_API.Migrations
 
             modelBuilder.Entity("ASP.NET_Core_Web_API.Models.Domain.Region", b =>
                 {
-                    b.Property<Guid>("ID")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
@@ -54,7 +57,7 @@ namespace ASP.NET_Core_Web_API.Migrations
                     b.Property<string>("RegionImageUrl")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("ID");
+                    b.HasKey("Id");
 
                     b.ToTable("Regions");
                 });

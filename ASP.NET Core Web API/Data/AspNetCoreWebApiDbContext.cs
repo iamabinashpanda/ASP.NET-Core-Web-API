@@ -3,9 +3,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ASP.NET_Core_Web_API.Data
 {
-    public class AspNetCoreWebApi : DbContext
+    public class AspNetCoreWebApiDbContext : DbContext
     {
-        public AspNetCoreWebApi(DbContextOptions options) : base(options)
+        public AspNetCoreWebApiDbContext(DbContextOptions options) : base(options)
         {
 
         }

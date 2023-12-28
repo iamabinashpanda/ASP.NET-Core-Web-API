@@ -9,7 +9,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<AspNetCoreWebApi>(options=>options.UseSqlServer(builder.Configuration.GetConnectionString("AspNetCoreConnectionString")));
+builder.Services.AddDbContext<AspNetCoreWebApiDbContext>(options=>options.UseSqlServer(builder.Configuration.GetConnectionString("AspNetCoreConnectionString")));
 
 var app = builder.Build();
 
