@@ -1,4 +1,5 @@
 using ASP.NET_Core_Web_API.Data;
+using ASP.NET_Core_Web_API.Mappings;
 using ASP.NET_Core_Web_API.Repositories;
 using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +14,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AspNetCoreWebApiDbContext>(options=>options.UseSqlServer(builder.Configuration.GetConnectionString("AspNetCoreConnectionString")));
 builder.Services.AddScoped<IRegionRepository, SQLRegionRepository>();
 
+builder.Services.AddAutoMapper(typeof(AutomapperProfiles));
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

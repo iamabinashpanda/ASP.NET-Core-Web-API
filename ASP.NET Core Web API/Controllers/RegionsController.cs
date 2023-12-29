@@ -2,6 +2,7 @@
 using ASP.NET_Core_Web_API.Models.Domain;
 using ASP.NET_Core_Web_API.Models.DTO;
 using ASP.NET_Core_Web_API.Repositories;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,26 +13,21 @@ namespace ASP.NET_Core_Web_API.Controllers
     [ApiController]
     public class RegionsController : ControllerBase
     {
-        private readonly AspNetCoreWebApiDbContext aspNetCoreWebApiDbContext;
         private readonly IRegionRepository regionRepository;
+        private readonly IMapper mapper;
 
-        public RegionsController(AspNetCoreWebApiDbContext aspNetCoreWebApiDbContext, IRegionRepository regionRepository)
+        public RegionsController( IRegionRepository regionRepository, IMapper mapper)
         {
-            this.aspNetCoreWebApiDbContext = aspNetCoreWebApiDbContext;
             this.regionRepository = regionRepository;
+            this.mapper = mapper;
         }
 
         //GET ALL REGIONS
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            //var regions = await aspNetCoreWebApiDbContext.Regions.ToListAsync();
             var regions = await regionRepository.GetAllAsync();
-            var regiondto = new List<RegionDTO>();
-            foreach (var region in regions)
-            {
-                regiondto.Add(new RegionDTO() { Name = region.Name, Id = region.Id, Code = region.Code, RegionImageUrl = region.RegionImageUrl });
-            }
+            var regiondto = mapper.Map<List<RegionDTO>>(regions);
             return Ok(regiondto);
         }
 
@@ -40,37 +36,20 @@ namespace ASP.NET_Core_Web_API.Controllers
         [Route("{id:Guid}")]
         public async Task<IActionResult> GetById([FromRoute] Guid id)
         {
-            //var regions = aspNetCoreWebApiDbContext.Regions.Find(id);
             var regions = await regionRepository.GetByIdAsync(id);
             if (regions == null)
             {
                 return NotFound();
             }
-            var regiondto = new RegionDTO
-            {
-                Name = regions.Name,
-                RegionImageUrl = regions.RegionImageUrl,
-                Code = regions.Code,
-                Id = regions.Id
-            };
-
-            return Ok(regiondto);
+            return Ok(mapper.Map<RegionDTO>(regions));
         }
         //INSERT REGIONS
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] AddRegionRequestDTO addRegionRequestDTO)
         {
-            var regionDomainModel = new Region
-            {
-                Name = addRegionRequestDTO.Name,
-                RegionImageUrl = addRegionRequestDTO.RegionImageUrl,
-                Code = addRegionRequestDTO.Code
-            };
-
+            var regionDomainModel = mapper.Map<Region>(addRegionRequestDTO);
             regionDomainModel = await regionRepository.CreateAsync(regionDomainModel);
-
-            var regionDTO = new RegionDTO { Name = regionDomainModel.Name, Id = regionDomainModel.Id, RegionImageUrl = regionDomainModel.RegionImageUrl, Code = regionDomainModel.Code };
-
+            var regionDTO = mapper.Map<RegionDTO>(regionDomainModel);
             return CreatedAtAction(nameof(GetById), new { id = regionDomainModel.Id}, regionDTO);
         }
 
@@ -79,28 +58,15 @@ namespace ASP.NET_Core_Web_API.Controllers
         [Route("{id:Guid}")]
         public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateRegionRequestDTO updateRegionRequestDTO)
         {
-            //var regionDomainModel = await aspNetCoreWebApiDbContext.Regions.FirstOrDefaultAsync(x=>x.Id == id);
-            var regionDomainModel = new Region
-            {
-                Code = updateRegionRequestDTO.Code, Name = updateRegionRequestDTO.Name, RegionImageUrl = updateRegionRequestDTO.RegionImageUrl
-            };
+            var regionDomainModel = mapper.Map<Region>(updateRegionRequestDTO);
             regionDomainModel = await regionRepository.UpdateAsync(id, regionDomainModel);
             if(regionDomainModel == null)
             {
                 return NotFound();
             }
-
-            var regionDTO = new RegionDTO
-            {
-                Id = regionDomainModel.Id,
-                Name = regionDomainModel.Name,
-                RegionImageUrl = regionDomainModel.RegionImageUrl,
-                Code = regionDomainModel.Code
-            };
-
-            return Ok(regionDTO);
+            return Ok(mapper.Map<RegionDTO>(regionDomainModel));
         }
-
+        //DELETE REGIONS
         [HttpDelete]
         [Route("{id:Guid}")]
         public async Task<IActionResult> Delete([FromRoute] Guid id) 
@@ -110,7 +76,6 @@ namespace ASP.NET_Core_Web_API.Controllers
             {
                 return NotFound();
             }
-
             return Ok();
         }
     }
