@@ -1,6 +1,7 @@
 ﻿using ASP.NET_Core_Web_API.Data;
 using ASP.NET_Core_Web_API.Models.Domain;
 using ASP.NET_Core_Web_API.Models.DTO;
+using ASP.NET_Core_Web_API.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,17 +13,20 @@ namespace ASP.NET_Core_Web_API.Controllers
     public class RegionsController : ControllerBase
     {
         private readonly AspNetCoreWebApiDbContext aspNetCoreWebApiDbContext;
+        private readonly IRegionRepository regionRepository;
 
-        public RegionsController(AspNetCoreWebApiDbContext aspNetCoreWebApiDbContext)
+        public RegionsController(AspNetCoreWebApiDbContext aspNetCoreWebApiDbContext, IRegionRepository regionRepository)
         {
             this.aspNetCoreWebApiDbContext = aspNetCoreWebApiDbContext;
+            this.regionRepository = regionRepository;
         }
 
         //GET ALL REGIONS
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var regions = await aspNetCoreWebApiDbContext.Regions.ToListAsync();
+            //var regions = await aspNetCoreWebApiDbContext.Regions.ToListAsync();
+            var regions = await regionRepository.GetAllAsync();
             var regiondto = new List<RegionDTO>();
             foreach (var region in regions)
             {
@@ -37,7 +41,7 @@ namespace ASP.NET_Core_Web_API.Controllers
         public async Task<IActionResult> GetById([FromRoute] Guid id)
         {
             //var regions = aspNetCoreWebApiDbContext.Regions.Find(id);
-            var regions = await aspNetCoreWebApiDbContext.Regions.FirstOrDefaultAsync(x => x.Id == id);
+            var regions = await regionRepository.GetByIdAsync(id);
             if (regions == null)
             {
                 return NotFound();
@@ -62,28 +66,29 @@ namespace ASP.NET_Core_Web_API.Controllers
                 RegionImageUrl = addRegionRequestDTO.RegionImageUrl,
                 Code = addRegionRequestDTO.Code
             };
-            await aspNetCoreWebApiDbContext.AddAsync(regionDomainModel);
-            await aspNetCoreWebApiDbContext.SaveChangesAsync();
+
+            regionDomainModel = await regionRepository.CreateAsync(regionDomainModel);
 
             var regionDTO = new RegionDTO { Name = regionDomainModel.Name, Id = regionDomainModel.Id, RegionImageUrl = regionDomainModel.RegionImageUrl, Code = regionDomainModel.Code };
 
             return CreatedAtAction(nameof(GetById), new { id = regionDomainModel.Id}, regionDTO);
         }
+
+        //UPDATE REGION
         [HttpPut]
         [Route("{id:Guid}")]
         public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateRegionRequestDTO updateRegionRequestDTO)
         {
-            var regionDomainModel = await aspNetCoreWebApiDbContext.Regions.FirstOrDefaultAsync(x=>x.Id == id);
+            //var regionDomainModel = await aspNetCoreWebApiDbContext.Regions.FirstOrDefaultAsync(x=>x.Id == id);
+            var regionDomainModel = new Region
+            {
+                Code = updateRegionRequestDTO.Code, Name = updateRegionRequestDTO.Name, RegionImageUrl = updateRegionRequestDTO.RegionImageUrl
+            };
+            regionDomainModel = await regionRepository.UpdateAsync(id, regionDomainModel);
             if(regionDomainModel == null)
             {
                 return NotFound();
             }
-
-            regionDomainModel.Code = updateRegionRequestDTO.Code;
-            regionDomainModel.Name = updateRegionRequestDTO.Name;
-            regionDomainModel.RegionImageUrl = updateRegionRequestDTO.RegionImageUrl;
-
-            await aspNetCoreWebApiDbContext.SaveChangesAsync();
 
             var regionDTO = new RegionDTO
             {
@@ -100,14 +105,11 @@ namespace ASP.NET_Core_Web_API.Controllers
         [Route("{id:Guid}")]
         public async Task<IActionResult> Delete([FromRoute] Guid id) 
         {
-            var regionDomainModel = await aspNetCoreWebApiDbContext.Regions.FirstOrDefaultAsync(x => x.Id == id);
+            var regionDomainModel = await regionRepository.DeleteAsync(id);
             if(regionDomainModel == null)
             {
                 return NotFound();
             }
-
-            aspNetCoreWebApiDbContext.Regions.Remove(regionDomainModel);
-            await aspNetCoreWebApiDbContext.SaveChangesAsync();
 
             return Ok();
         }
