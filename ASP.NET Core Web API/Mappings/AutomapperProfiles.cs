@@ -10,6 +10,8 @@ namespace ASP.NET_Core_Web_API.Mappings
             CreateMap<Region, RegionDTO>().ReverseMap();
             CreateMap<Region, AddRegionRequestDTO>().ReverseMap();
             CreateMap<Region, UpdateRegionRequestDTO>().ReverseMap();
+            CreateMap<Walk, AddWalkRequestDTO>().ReverseMap();
+            CreateMap<Walk, WalkDTO>().ReverseMap();
         }
     }
 }

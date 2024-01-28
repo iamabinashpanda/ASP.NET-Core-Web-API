@@ -13,6 +13,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<AspNetCoreWebApiDbContext>(options=>options.UseSqlServer(builder.Configuration.GetConnectionString("AspNetCoreConnectionString")));
 builder.Services.AddScoped<IRegionRepository, SQLRegionRepository>();
+builder.Services.AddScoped<IWalkRepository, SQLWalkRepository>();
 
 builder.Services.AddAutoMapper(typeof(AutomapperProfiles));
 var app = builder.Build();
